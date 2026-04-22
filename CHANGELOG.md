@@ -1,14 +1,10 @@
 # Changelog
 
-All notable changes to this project will be documented here. Automated
-releases are produced by `.github/workflows/release.yml` on every push to
-`main` that touches the extension source.
+All notable changes to this project will be documented here. Releases are
+produced by `.github/workflows/release.yml` when triggered manually with a
+target version.
 
 ## Unreleased
-
-- (changes here before the next release)
-
-## v0.1.0 — 2026-04-22
 
 - Initial version.
 - Per-duration rules with configurable side (start or end) and shortening

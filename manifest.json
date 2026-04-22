@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Better Speedy Meetings",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Configurable speedy meetings for Google Calendar. Shorten meetings by a custom amount at the start or end, per-duration.",
   "browser_specific_settings": {
     "gecko": {
