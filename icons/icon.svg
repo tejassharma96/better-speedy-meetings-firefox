@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect x="8" y="16" width="112" height="104" rx="14" fill="#1a73e8"/>
+  <rect x="8" y="16" width="112" height="22" rx="14" fill="#1558b0"/>
+  <rect x="28" y="8" width="8" height="20" rx="3" fill="#1558b0"/>
+  <rect x="92" y="8" width="8" height="20" rx="3" fill="#1558b0"/>
+  <!-- clock face -->
+  <circle cx="64" cy="78" r="30" fill="#ffffff"/>
+  <circle cx="64" cy="78" r="30" fill="none" stroke="#1558b0" stroke-width="3"/>
+  <!-- hour hand pointing to ~ -5 from 12 (shortened) -->
+  <line x1="64" y1="78" x2="64" y2="58" stroke="#ea4335" stroke-width="4" stroke-linecap="round"/>
+  <line x1="64" y1="78" x2="80" y2="66" stroke="#1558b0" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="64" cy="78" r="3" fill="#1558b0"/>
+  <!-- speed line -->
+  <path d="M38 50 L54 50" stroke="#fbbc04" stroke-width="4" stroke-linecap="round"/>
+  <path d="M34 60 L50 60" stroke="#fbbc04" stroke-width="4" stroke-linecap="round"/>
+</svg>

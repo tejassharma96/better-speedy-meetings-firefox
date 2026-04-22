@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Better Speedy Meetings</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Better Speedy Meetings</h1>
+      <label class="toggle">
+        <input type="checkbox" id="enabled" />
+        <span>Enabled</span>
+      </label>
+    </header>
+
+    <section class="rules">
+      <div class="rules-header">
+        <h2>Rules</h2>
+        <button type="button" id="add-rule" class="ghost">+ Add rule</button>
+      </div>
+
+      <div class="rules-colhead">
+        <span>When meeting is</span>
+        <span>Shorten by</span>
+        <span>At</span>
+        <span></span>
+      </div>
+
+      <ul id="rule-list"></ul>
+
+      <p class="hint">
+        Meetings whose length matches a rule exactly are shortened by the
+        configured amount, either by moving the start later or the end earlier.
+        Durations with no matching rule are left alone.
+      </p>
+    </section>
+
+    <footer>
+      <button type="button" id="reset" class="ghost">Reset to defaults</button>
+      <span id="status" aria-live="polite"></span>
+    </footer>
+
+    <template id="rule-row">
+      <li class="rule">
+        <label>
+          <input type="number" class="duration" min="1" step="1" /> min
+        </label>
+        <label>
+          <input type="number" class="shortenBy" min="1" step="1" /> min
+        </label>
+        <select class="side">
+          <option value="start">start (later)</option>
+          <option value="end">end (earlier)</option>
+        </select>
+        <button type="button" class="remove ghost" title="Remove rule">✕</button>
+      </li>
+    </template>
+
+    <script src="storage.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
