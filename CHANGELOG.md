@@ -6,6 +6,10 @@ target version.
 
 ## Unreleased
 
+- (changes here before the next release)
+
+## v0.1.0 — 2026-04-22
+
 - Initial version.
 - Per-duration rules with configurable side (start or end) and shortening
   amount.
