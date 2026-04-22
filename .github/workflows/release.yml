@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write # tag, commit, release
 
+# Opt into Node.js 24 for all JavaScript actions. Node 20 is deprecated on
+# GitHub runners (forced off by June 2026). This env var is a transition hook
+# that works regardless of whether each action has shipped a Node 24 release.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: release
   cancel-in-progress: false
