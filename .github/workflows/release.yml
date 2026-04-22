@@ -1,0 +1,137 @@
+name: Release
+
+# Manually triggered. Provide the target version (without leading `v`) and the
+# workflow updates manifest.json + CHANGELOG.md, commits on main, tags, builds
+# the extension zip with web-ext, and creates a GitHub release with the zip
+# attached.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New version (e.g. 0.2.0). Must be strictly greater than the current manifest version."
+        required: true
+        type: string
+
+permissions:
+  contents: write # tag, commit, release
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate version input
+        id: ver
+        run: |
+          set -euo pipefail
+          v="${{ inputs.version }}"
+          v="${v#v}" # tolerate a leading 'v'
+          if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version '$v' is not in X.Y.Z form"
+            exit 1
+          fi
+          tag="v${v}"
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            echo "::error::Tag ${tag} already exists"
+            exit 1
+          fi
+          current=$(python3 -c 'import json;print(json.load(open("manifest.json"))["version"])')
+          # Semver comparison via sort -V: require new > current.
+          lower=$(printf '%s\n%s\n' "$current" "$v" | sort -V | head -n1)
+          if [ "$v" = "$current" ] || [ "$lower" = "$v" ]; then
+            echo "::error::Version $v is not strictly greater than current $current"
+            exit 1
+          fi
+          echo "version=$v" >>"$GITHUB_OUTPUT"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+
+      - name: Update manifest.json version
+        run: |
+          python3 - <<PY
+          import json, pathlib
+          p = pathlib.Path("manifest.json")
+          m = json.loads(p.read_text())
+          m["version"] = "${{ steps.ver.outputs.version }}"
+          p.write_text(json.dumps(m, indent=2) + "\n")
+          PY
+
+      - name: Update CHANGELOG.md
+        run: |
+          set -euo pipefail
+          today=$(date -u +%Y-%m-%d)
+          heading="## ${{ steps.ver.outputs.tag }} — ${today}"
+          python3 - <<PY
+          import re, pathlib
+          p = pathlib.Path("CHANGELOG.md")
+          text = p.read_text()
+          new_unreleased = "## Unreleased\n\n- (changes here before the next release)\n\n"
+          text, n = re.subn(
+              r"## Unreleased\n\n(- \(changes here before the next release\)\n\n)?",
+              new_unreleased + "${heading}" + "\n\n",
+              text,
+              count=1,
+          )
+          if n == 0:
+              # No "Unreleased" section to rotate — insert heading after the top "# Changelog" block.
+              text = re.sub(
+                  r"(# Changelog\n\n(?:[^\n#]*\n)*\n?)",
+                  r"\1${heading}\n\n- (no notes)\n\n",
+                  text,
+                  count=1,
+              )
+          p.write_text(text)
+          PY
+
+      - name: Install web-ext + lint
+        run: |
+          npm install --no-save web-ext@8
+          npx web-ext lint --source-dir .
+
+      - name: Commit + tag
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config commit.gpgsign false
+          git add manifest.json CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "Nothing to commit (manifest/CHANGELOG already at target)."
+          else
+            git commit -m "chore: release ${{ steps.ver.outputs.tag }}"
+          fi
+          git tag "${{ steps.ver.outputs.tag }}"
+          git push origin HEAD:main --follow-tags
+
+      - name: Build extension
+        run: npx web-ext build --source-dir . --artifacts-dir web-ext-artifacts
+
+      - name: Rename artifact
+        id: artifact
+        run: |
+          set -euo pipefail
+          cd web-ext-artifacts
+          src=$(ls *.zip | head -n1)
+          dst="better-speedy-meetings-${{ steps.ver.outputs.tag }}.zip"
+          mv "$src" "$dst"
+          echo "path=web-ext-artifacts/${dst}" >>"$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          generate_release_notes: true
+          files: ${{ steps.artifact.outputs.path }}
