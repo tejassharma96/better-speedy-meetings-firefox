@@ -5,6 +5,11 @@ instead of Google's built-in speedy-meetings toggle (fixed 25 / 50 min), you
 configure your own rules — e.g. "shorten 30-minute meetings by 2 min at the
 start" or "shorten 60-minute meetings by 10 min at the end".
 
+> ⚠️ **Disclaimer:** this extension was largely vibe-coded with an AI
+> assistant. I'm not a JavaScript expert and Google Calendar's DOM is not a
+> public contract, so expect occasional breakage when Google ships UI changes.
+> PRs and issue reports welcome.
+
 ## Features
 
 - Per-duration rules: each rule maps an exact meeting length (e.g. 30 min) to
